@@ -505,6 +505,11 @@ func Publish(w http.ResponseWriter, req *http.Request) {
 			"subject":  subject,
 		}).Debug("Publish to Topic")
 		for _, subs := range app.SyncTopics.Topics[topicName].Subscriptions {
+
+			if subs.FilterPolicy != nil && !subs.FilterPolicy.IsSatisfiedBy(messageAttributes) {
+				continue
+			}
+
 			switch app.Protocol(subs.Protocol) {
 			case app.ProtocolSQS:
 				publishSQS(w, req, subs, messageBody, messageAttributes, subject, topicArn, topicName, messageStructure)
